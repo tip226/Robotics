@@ -5,7 +5,9 @@ import sensor, image, time, math, pyb
 # Import the pyb module for LED control
 red_led = pyb.LED(1)
 
-red_threshold = (30, 100, 15, 127, 15, 127)
+red_threshold = (34, 63, 52, 77, 5, 43)
+face_threshold = (35, 45, 20, 40, 10, 40)
+#red_threshold = ((17, 35, 20, 20, -26, 10), (45, 63, 40, 77, 40, 67))
 
 sensor.reset()
 sensor.set_pixformat(sensor.RGB565)
@@ -13,6 +15,9 @@ sensor.set_framesize(sensor.QVGA)
 sensor.skip_frames(time=2000)
 sensor.set_auto_gain(False)  # must be turned off for color tracking
 sensor.set_auto_whitebal(False)  # must be turned off for color tracking
+sensor.set_contrast(-3)
+sensor.set_brightness(0)
+sensor.set_saturation(3)
 clock = time.clock()
 
 while(True):
@@ -21,9 +26,9 @@ while(True):
     red_detected = False
 
     for blob in img.find_blobs([red_threshold], pixels_threshold=100, area_threshold=100):
-            img.draw_rectangle(blob.rect())
-            img.draw_cross(blob.cx(), blob.cy())
-            red_detected = True
+        img.draw_rectangle(blob.rect())
+        img.draw_cross(blob.cx(), blob.cy())
+        red_detected = True
 
     if red_detected:
         red_led.on()
