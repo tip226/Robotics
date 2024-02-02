@@ -4,9 +4,11 @@ import sensor, image, time, math, pyb
 
 # Import the pyb module for LED control
 red_led = pyb.LED(1)
+blue_led = pyb.LED(3)
 
 red_threshold = (34, 63, 52, 77, 5, 43)
-face_threshold = (35, 45, 20, 40, 10, 40)
+blue_threshold = (40, 60, 0, 25, -80, 60)
+#face_threshold = (35, 45, 20, 40, 10, 40)
 #red_threshold = ((17, 35, 20, 20, -26, 10), (45, 63, 40, 77, 40, 67))
 
 sensor.reset()
@@ -23,16 +25,33 @@ clock = time.clock()
 while(True):
     clock.tick()
     img = sensor.snapshot()
+    blobs = img.find_blobs([red_threshold, blue_threshold], pixels_threshold=100, area_threshold=100, merge=True)
     red_detected = False
+    blue_detected = False
 
-    for blob in img.find_blobs([red_threshold], pixels_threshold=100, area_threshold=100):
-        img.draw_rectangle(blob.rect())
-        img.draw_cross(blob.cx(), blob.cy())
-        red_detected = True
+    for blob in blobs:
+        if blob.code() == 1:
+            img.draw_rectangle(blob.rect(), color=(255, 0, 0))
+            img.draw_cross(blob.cx(), blob.cy(), color=(255, 0, 0))
+            red_detected = True
+        elif blob.code() == 2:
+            img.draw_rectangle(blob.rect(), color=(0, 0, 255))
+            img.draw_cross(blob.cx(), blob.cy(), color=(0, 0, 255))
+            blue_detected = True
 
-    if red_detected:
+    # Control LEDs based on detected colors
+    if red_detected and not blue_detected:
         red_led.on()
+        blue_led.off()
+    elif blue_detected and not red_detected:
+        blue_led.on()
+        red_led.off()
+    elif red_detected and blue_detected:
+        # Turn on both LEDs to represent "pink"
+        red_led.on()
+        blue_led.on()
     else:
         red_led.off()
+        blue_led.off()
 
     print(clock.fps())
