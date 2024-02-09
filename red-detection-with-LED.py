@@ -7,7 +7,7 @@ red_led = pyb.LED(1)
 blue_led = pyb.LED(3)
 
 red_threshold = (34, 63, 52, 77, 5, 43)
-blue_threshold = (40, 60, 0, 25, -80, 60)
+blue_threshold = (7, 74, -20, 59, -59, -22)
 #face_threshold = (35, 45, 20, 40, 10, 40)
 #red_threshold = ((17, 35, 20, 20, -26, 10), (45, 63, 40, 77, 40, 67))
 
