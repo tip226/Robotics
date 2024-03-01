@@ -6,8 +6,8 @@ from pyb import UART
 uart = UART(1, 19200, timeout_char=200)
 
 # Color detection thresholds
-red_threshold = (16, 100, 9, 58, -33, 47)
-blue_threshold = (0, 33, -11, -2, -128, 32)
+red_threshold = (0, 46, 60, -1, -32, 29)
+blue_threshold = (0, 61, 9, -58, -77, 15)
 
 # Camera setup
 sensor.reset()
