@@ -48,10 +48,17 @@ class Tracking_ROI:
             if x == None:
                 return
             else:
-                xx = x - 0.15*w
-                yy = y - 0.15*h
-                ww = 1.3*w
-                hh = 1.3*h
+                buffer_ratio = 0.15 // make a buffer variable for easy testing
+                xx = x - buffer_ratio*w
+                yy = y - buffer_ratio*h
+                ww = (1+buffer_ratio*2)*w
+                hh = (1+buffer_ratio*2)*h
+
+                # make sure that ROI doesn't exceed the max dimension
+                if xx + ww > self.max_w:
+                    xx = self.max_w - ww
+                if yy + hh > self.max_h:
+                    yy = self.max_h - hh
                 self.roi[0] = (1 - self.ff)*self.roi[0] + self.ff*xx
                 self.roi[1] = (1 - self.ff)*self.roi[1] + self.ff*yy
                 self.roi[2] = (1 - self.ff)*self.roi[2] + self.ff*ww
