@@ -48,7 +48,7 @@ class Tracking_ROI:
             if x == None:
                 return
             else:
-                buffer_ratio = 0.15 // make a buffer variable for easy testing
+                buffer_ratio = 0.15 # make a buffer variable for easy testing
                 xx = x - buffer_ratio*w
                 yy = y - buffer_ratio*h
                 ww = (1+buffer_ratio*2)*w
@@ -90,7 +90,10 @@ class TrackedBlob:
     """
     def __init__(self, init_blob, norm_level: int,
                        feature_dist_threshold=100,
-                       window_size = 3, blob_id=0):
+                       window_size = 3, blob_id=0,
+                       adjustment_factor=0.1,
+                       max_threshold=200,
+                       min_threshold=50):
         self.blob_history = [init_blob]
         self.feature_vector = [init_blob.x(),
                                init_blob.y(),
@@ -103,6 +106,23 @@ class TrackedBlob:
         self.feature_dist_threshold = feature_dist_threshold
         self.window_size = window_size
         self.id = blob_id
+        self.adjustment_factor = adjustment_factor
+        self.max_threshold = max_threshold
+        self.min_threshold = min_threshold
+
+    def update_threshold(self, successful_tracking):
+            """
+            Dynamically adjust the feature distance threshold based on the tracking success.
+            """
+            if successful_tracking:
+                # Decrease threshold to refine accuracy
+                self.feature_dist_threshold -= self.adjustment_factor * self.feature_dist_threshold
+            else:
+                # Increase threshold to improve robustness
+                self.feature_dist_threshold += self.adjustment_factor * self.feature_dist_threshold
+
+            # Ensure threshold stays within predefined bounds
+            self.feature_dist_threshold = max(self.min_threshold, min(self.max_threshold, self.feature_dist_threshold))
 
     def reset(self):
         """ Reset the tracker by empty the blob_history and feature vector while
@@ -158,6 +178,7 @@ class TrackedBlob:
         if blobs is None:
             # auto fail if None is fed
             self.untracked_frames += 1
+            self.update_threshold(False)
             return None
 
         min_dist = 32767
@@ -172,6 +193,7 @@ class TrackedBlob:
         if min_dist < self.feature_dist_threshold:
             # update the feature history if the feature distance is below the threshold
             self.untracked_frames = 0
+            self.update_threshold(True)  # Successful tracking
             # print("Successful Update! Distance: {}".format(min_dist))
             history_size = len(self.blob_history)
             self.blob_history.append(candidate_blob)
@@ -203,6 +225,7 @@ class TrackedBlob:
             return candidate_blob.rect()
         else:
             self.untracked_frames += 1
+            self.update_threshold(False)  # Unsuccessful tracking
             return None
 
 
